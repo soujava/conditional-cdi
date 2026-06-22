@@ -1,4 +1,4 @@
-package com.otavio.jakarta.cdi.app;
+package com.otavio.jakarta.cdi.app.condition;
 
 
 import com.otavio.jakarta.cdi.Condition;
