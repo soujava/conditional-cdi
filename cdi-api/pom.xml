@@ -4,11 +4,11 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>expert.os.books.architecture.patterns</groupId>
-    <artifactId>chapter-11</artifactId>
+    <groupId>com.otavio.demo</groupId>
+    <artifactId>cdi-api</artifactId>
     <version>1.0.0</version>
 
-    <name>chapter-11</name>
+    <name>cdi-api</name>
     <url>http://www.os.expert</url>
 
     <properties>
