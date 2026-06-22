@@ -29,8 +29,9 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * participate in typesafe resolution.
  * </p>
  * <p>
- * This annotation is not repeatable. If a bean requires multiple setting checks
- * or more complex activation logic, use {@link RequiresCondition} instead.
+ * This annotation supports a single setting check. If a bean requires multiple
+ * checks or more complex activation logic, use {@link RequiresCondition}
+ * instead.
  * </p>
  *
  * <pre>{@code
@@ -47,6 +48,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 @Target({TYPE, METHOD, FIELD})
 public @interface RequiresSetting {
+
     /**
      * The name of the runtime setting to resolve.
      *
