@@ -47,4 +47,17 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 @Target({TYPE, METHOD, FIELD})
 public @interface RequiresSetting {
+    /**
+     * The name of the runtime setting to resolve.
+     *
+     * @return the setting name
+     */
+    String name();
+
+    /**
+     * The expected value of the runtime setting.
+     *
+     * @return the required setting value
+     */
+    String value();
 }
