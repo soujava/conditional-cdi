@@ -1,0 +1,14 @@
+package com.otavio.jakarta.cdi.app;
+
+import com.otavio.jakarta.cdi.RequiresCondition;
+import jakarta.enterprise.context.ApplicationScoped;
+
+@RequiresCondition(StripeAvailableCondition.class)
+@ApplicationScoped
+public class StripePaymentGateway implements PaymentGateway {
+
+    @Override
+    public void pay() {
+        System.out.println("Processing payment with Stripe");
+    }
+}
