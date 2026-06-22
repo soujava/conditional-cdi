@@ -27,12 +27,6 @@
     <dependencies>
         <dependency>
             <groupId>io.smallrye.config</groupId>
-            <artifactId>smallrye-config-core</artifactId>
-            <version>3.17.2</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.smallrye.config</groupId>
             <artifactId>smallrye-config</artifactId>
             <version>3.17.2</version>
         </dependency>
@@ -42,21 +36,6 @@
             <version>6.0.4.Final</version>
         </dependency>
 
-        <dependency>
-            <groupId>dev.langchain4j.cdi</groupId>
-            <artifactId>langchain4j-cdi-portable-ext</artifactId>
-            <version>${langchain4j-cdi.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>dev.langchain4j.cdi.mp</groupId>
-            <artifactId>langchain4j-cdi-config</artifactId>
-            <version>${langchain4j-cdi.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>dev.langchain4j</groupId>
-            <artifactId>langchain4j-open-ai</artifactId>
-            <version>1.16.0</version>
-        </dependency>
     </dependencies>
 
 </project>
