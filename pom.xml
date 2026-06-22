@@ -13,6 +13,7 @@
 
     <modules>
         <module>cdi-api</module>
+        <module>sample</module>
     </modules>
     
 </project>
