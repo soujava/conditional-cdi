@@ -3,7 +3,7 @@ package com.otavio.jakarta.cdi.app.condition;
 import com.otavio.jakarta.cdi.RequiresCondition;
 import jakarta.enterprise.context.ApplicationScoped;
 
-@RequiresCondition(StripeAvailableCondition.class)
+@RequiresCondition(PaypalAvailableCondition.class)
 @ApplicationScoped
 public class PaypalPaymentGateway implements PaymentGateway {
 
