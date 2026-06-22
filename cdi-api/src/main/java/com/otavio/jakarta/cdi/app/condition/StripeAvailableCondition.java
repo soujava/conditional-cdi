@@ -7,11 +7,6 @@ public class StripeAvailableCondition implements Condition {
 
     @Override
     public boolean test() {
-        try {
-            Class.forName("com.stripe.Stripe");
-            return true;
-        } catch (ClassNotFoundException exception) {
-            return false;
-        }
+       return PaymentGateway.STRIPE_AVAILABLE;
     }
 }
