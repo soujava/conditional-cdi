@@ -1,5 +1,7 @@
 package com.otavio.jakarta.cdi;
 
+import jakarta.enterprise.context.ApplicationScoped;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -47,6 +49,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Documented
 @Retention(RUNTIME)
 @Target({TYPE, METHOD, FIELD})
+@ApplicationScoped
 public @interface RequiresSetting {
 
     /**
