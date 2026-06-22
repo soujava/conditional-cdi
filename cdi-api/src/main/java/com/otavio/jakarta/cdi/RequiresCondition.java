@@ -11,25 +11,21 @@ import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Specifies that a CDI bean is enabled only when one or more custom conditions
- * match.
+ * Specifies that a CDI bean is enabled only when one or more custom conditions evaluate to {@code true}.
  * <p>
- * This annotation provides the low-level extension point for conditional bean
- * activation. It is intended for cases where a simple setting comparison is not
- * sufficient.
+ * This annotation provides the low-level extension point for conditional bean activation. It is intended for cases
+ * where {@link RequiresSetting} is not sufficient.
  * </p>
  * <p>
- * When this annotation is declared on a bean class, producer method, or producer
- * field, the CDI container must evaluate the declared {@link Condition}
- * implementations before the bean participates in typesafe resolution.
+ * When this annotation is declared on a bean class, producer method, or producer field, the CDI container must evaluate
+ * the declared {@link Condition} implementations before the bean participates in typesafe resolution.
  * </p>
  * <p>
- * If any declared condition does not match, the annotated bean is not enabled
- * and must not participate in typesafe resolution.
+ * If any declared condition evaluates to {@code false}, the annotated bean is not enabled and must not participate in
+ * typesafe resolution.
  * </p>
  * <p>
- * If multiple condition classes are declared, all of them must match for the
- * bean to be enabled.
+ * If multiple condition classes are declared, all of them must evaluate to {@code true} for the bean to be enabled.
  * </p>
  *
  * <pre>{@code
@@ -48,8 +44,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public @interface RequiresCondition {
 
     /**
-     * The condition classes that must match for the annotated bean to be
-     * enabled.
+     * The condition classes that must evaluate to {@code true} for the annotated bean to be enabled.
      *
      * @return the required condition classes
      */
