@@ -1,0 +1,1 @@
+package com.otavio.jakarta.cdi.app.configuration;
