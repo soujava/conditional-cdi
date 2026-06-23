@@ -1,4 +1,5 @@
 = Conditional Bean Activation for CDI
+:toc: auto
 
 This project demonstrates a small proposal for conditional bean activation in CDI.
 
