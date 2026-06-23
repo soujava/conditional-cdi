@@ -17,63 +17,6 @@ TaxCalculator taxCalculator;
 
 The application should not need a producer method, manual lookup, or conditional logic at the injection point. CDI should resolve the correct implementation based on the active deployment.
 
-== Why this matters
-
-CDI already provides powerful mechanisms such as qualifiers, alternatives, producers, portable extensions, and build-compatible extensions. However, these features do not directly express a common requirement:
-
-[source,text]
-
-```
-This bean should exist only when this condition is true.
-```
-
-Without conditional bean activation, developers often move this decision into producer methods:
-
-[source,java]
-
-```
-@Produces
-TaxCalculator taxCalculator() {
-    if ("BR".equals(System.getProperty("app.country"))) {
-        return new BrazilTaxCalculator();
-    }
-    return new PortugalTaxCalculator();
-}
-```
-
-This works, but it hides the activation rule away from the bean itself. The implementation classes no longer explain when they are active.
-
-Conditional activation keeps the rule close to the bean:
-
-[source,java]
-
-```
-@RequiresSetting(name = "app.country", value = "BR")
-@ApplicationScoped
-public class BrazilTaxCalculator implements TaxCalculator {
-}
-```
-
-[source,java]
-
-```
-@RequiresSetting(name = "app.country", value = "PT")
-@ApplicationScoped
-public class PortugalTaxCalculator implements TaxCalculator {
-}
-```
-
-Then the injection point remains clean:
-
-[source,java]
-
-```
-@Inject
-TaxCalculator taxCalculator;
-```
-
-Only the matching bean participates in CDI typesafe resolution.
-
 == API overview
 
 The sample introduces two annotations and one contract:
