@@ -43,12 +43,8 @@ public interface Condition {
 }
 ```
 
-`@RequiresSetting` is intended for simple setting-based activation.
-
-`@RequiresCondition` is intended for custom logic.
-
-A bean whose requirement does not match is not enabled and must not participate in CDI typesafe resolution.
-
+* `@RequiresSetting` is intended for simple setting-based activation.
+* `@RequiresCondition` is intended for custom logic.
 
 == Sample 1: conditional activation with a custom condition
 
@@ -222,40 +218,3 @@ Expected output:
 ```
 Tax for 100: 23.00
 ```
-
-== Current sample behavior
-
-The sample follows these rules:
-
-* `@RequiresCondition` evaluates a custom `Condition`.
-* `@RequiresSetting` evaluates a named runtime setting.
-* A non-matching bean is not enabled.
-* A non-enabled bean does not participate in CDI typesafe resolution.
-* Conditional annotations do not make a class discoverable as a CDI bean.
-* The setting resolution strategy belongs to the provider.
-
-== Design goal
-
-The main design goal is to improve developer experience without breaking CDI’s programming model.
-
-Application code should stay simple:
-
-[source,java]
-
-```
-@Inject
-TaxCalculator taxCalculator;
-```
-
-Bean implementations should declare when they are active:
-
-[source,java]
-
-```
-@RequiresSetting(name = "app.country", value = "PT")
-@ApplicationScoped
-public class PortugalTaxCalculator implements TaxCalculator {
-}
-```
-
-The container should handle the activation decision during bootstrap, before typesafe resolution.
