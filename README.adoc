@@ -1,1 +1,318 @@
-= Condicional API
+= Conditional Bean Activation for CDI
+
+This project demonstrates a small proposal for conditional bean activation in CDI.
+
+The goal is simple: allow a CDI bean to participate in typesafe resolution only when a condition matches the current deployment.
+
+This is useful when an application has multiple implementations of the same contract, but only one of them should be enabled depending on the runtime environment, deployment configuration, available capability, or custom rule.
+
+For example, an application may have:
+
+[source,java]
+
+```
+@Inject
+TaxCalculator taxCalculator;
+```
+
+The application should not need a producer method, manual lookup, or conditional logic at the injection point. CDI should resolve the correct implementation based on the active deployment.
+
+== Why this matters
+
+CDI already provides powerful mechanisms such as qualifiers, alternatives, producers, portable extensions, and build-compatible extensions. However, these features do not directly express a common requirement:
+
+[source,text]
+
+```
+This bean should exist only when this condition is true.
+```
+
+Without conditional bean activation, developers often move this decision into producer methods:
+
+[source,java]
+
+```
+@Produces
+TaxCalculator taxCalculator() {
+    if ("BR".equals(System.getProperty("app.country"))) {
+        return new BrazilTaxCalculator();
+    }
+    return new PortugalTaxCalculator();
+}
+```
+
+This works, but it hides the activation rule away from the bean itself. The implementation classes no longer explain when they are active.
+
+Conditional activation keeps the rule close to the bean:
+
+[source,java]
+
+```
+@RequiresSetting(name = "app.country", value = "BR")
+@ApplicationScoped
+public class BrazilTaxCalculator implements TaxCalculator {
+}
+```
+
+[source,java]
+
+```
+@RequiresSetting(name = "app.country", value = "PT")
+@ApplicationScoped
+public class PortugalTaxCalculator implements TaxCalculator {
+}
+```
+
+Then the injection point remains clean:
+
+[source,java]
+
+```
+@Inject
+TaxCalculator taxCalculator;
+```
+
+Only the matching bean participates in CDI typesafe resolution.
+
+== API overview
+
+The sample introduces two annotations and one contract:
+
+[source,java]
+
+```
+@RequiresSetting(name = "app.country", value = "BR")
+```
+
+[source,java]
+
+```
+@RequiresCondition(BrazilCondition.class)
+```
+
+[source,java]
+
+```
+@FunctionalInterface
+public interface Condition {
+
+    boolean test();
+}
+```
+
+`@RequiresSetting` is intended for simple setting-based activation.
+
+`@RequiresCondition` is intended for custom logic.
+
+A bean whose requirement does not match is not enabled and must not participate in CDI typesafe resolution.
+
+
+== Sample 1: conditional activation with a custom condition
+
+The first sample demonstrates `@RequiresCondition`.
+
+It defines a common contract:
+
+[source,java]
+
+```
+public interface PaymentGateway {
+
+    boolean STRIPE_AVAILABLE = false;
+
+    void pay();
+}
+```
+
+There are two conditions.
+
+The Stripe condition enables Stripe only when the flag is `true`:
+
+[source,java]
+
+```
+public class StripeAvailableCondition implements Condition {
+
+    @Override
+    public boolean test() {
+        return PaymentGateway.STRIPE_AVAILABLE;
+    }
+}
+```
+
+The Paypal condition enables Paypal when the same flag is `false`:
+
+[source,java]
+
+```
+public class PaypalAvailableCondition implements Condition {
+
+    @Override
+    public boolean test() {
+        return !PaymentGateway.STRIPE_AVAILABLE;
+    }
+}
+```
+
+The Stripe implementation is enabled only when the Stripe condition matches:
+
+[source,java]
+
+```
+@RequiresCondition(StripeAvailableCondition.class)
+@ApplicationScoped
+public class StripePaymentGateway implements PaymentGateway {
+
+    @Override
+    public void pay() {
+        System.out.println("Processing payment with Stripe");
+    }
+}
+```
+
+The Paypal implementation is enabled only when the Paypal condition matches:
+
+[source,java]
+
+```
+@RequiresCondition(PaypalAvailableCondition.class)
+@ApplicationScoped
+public class PaypalPaymentGateway implements PaymentGateway {
+
+    @Override
+    public void pay() {
+        System.out.println("Processing payment with Paypal");
+    }
+}
+```
+
+The application only selects the interface:
+
+[source,java]
+
+```
+try (var container = SeContainerInitializer.newInstance().initialize()) {
+    PaymentGateway paymentGateway = container.select(PaymentGateway.class).get();
+    paymentGateway.pay();
+}
+```
+
+Because `STRIPE_AVAILABLE` is `false`, the Stripe bean is not enabled and the Paypal bean remains enabled.
+
+Expected output:
+
+[source,text]
+
+```
+Processing payment with Paypal
+```
+
+To switch the active implementation, change the flag to `true`.
+
+== Sample 2: conditional activation with a setting
+
+The second sample demonstrates `@RequiresSetting`.
+
+It defines a common contract:
+
+[source,java]
+
+```
+public interface TaxCalculator {
+
+    BigDecimal calculate(BigDecimal amount);
+}
+```
+
+The Brazil implementation is enabled only when `app.country` resolves to `BR`:
+
+[source,java]
+
+```
+@RequiresSetting(name = "app.country", value = "BR")
+@ApplicationScoped
+public class BrazilTaxCalculator implements TaxCalculator {
+
+    @Override
+    public BigDecimal calculate(BigDecimal amount) {
+        return amount.multiply(new BigDecimal("0.17"));
+    }
+}
+```
+
+The Portugal implementation is enabled only when `app.country` resolves to `PT`:
+
+[source,java]
+
+```
+@RequiresSetting(name = "app.country", value = "PT")
+@ApplicationScoped
+public class PortugalTaxCalculator implements TaxCalculator {
+
+    @Override
+    public BigDecimal calculate(BigDecimal amount) {
+        return amount.multiply(new BigDecimal("0.23"));
+    }
+}
+```
+
+The application sets the country before bootstrapping CDI SE:
+
+[source,java]
+
+```
+System.setProperty("app.country", "PT");
+
+try (var container = SeContainerInitializer.newInstance().initialize()) {
+    TaxCalculator taxCalculator = container.select(TaxCalculator.class).get();
+    System.out.println("Tax for 100: "
+            + taxCalculator.calculate(new BigDecimal("100")));
+}
+```
+
+Because `app.country` is `PT`, the Brazil bean is not enabled and the Portugal bean remains enabled.
+
+Expected output:
+
+[source,text]
+
+```
+Tax for 100: 23.00
+```
+
+== Current sample behavior
+
+The sample follows these rules:
+
+* `@RequiresCondition` evaluates a custom `Condition`.
+* `@RequiresSetting` evaluates a named runtime setting.
+* A non-matching bean is not enabled.
+* A non-enabled bean does not participate in CDI typesafe resolution.
+* Conditional annotations do not make a class discoverable as a CDI bean.
+* The setting resolution strategy belongs to the provider.
+
+== Design goal
+
+The main design goal is to improve developer experience without breaking CDI’s programming model.
+
+Application code should stay simple:
+
+[source,java]
+
+```
+@Inject
+TaxCalculator taxCalculator;
+```
+
+Bean implementations should declare when they are active:
+
+[source,java]
+
+```
+@RequiresSetting(name = "app.country", value = "PT")
+@ApplicationScoped
+public class PortugalTaxCalculator implements TaxCalculator {
+}
+```
+
+The container should handle the activation decision during bootstrap, before typesafe resolution.
