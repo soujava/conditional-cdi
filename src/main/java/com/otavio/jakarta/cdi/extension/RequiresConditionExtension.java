@@ -8,6 +8,7 @@ import jakarta.enterprise.inject.spi.BeanAttributes;
 import jakarta.enterprise.inject.spi.DefinitionException;
 import jakarta.enterprise.inject.spi.Extension;
 import jakarta.enterprise.inject.spi.ProcessBeanAttributes;
+import jakarta.enterprise.inject.spi.ProcessSyntheticBean;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.logging.Level;
@@ -25,6 +26,7 @@ import java.util.logging.Logger;
 public class RequiresConditionExtension implements Extension {
 
     private static final Logger LOGGER = Logger.getLogger(RequiresConditionExtension.class.getName());
+
     /**
      * Evaluates {@link RequiresCondition} before the bean participates in CDI
      * typesafe resolution.
@@ -71,6 +73,25 @@ public class RequiresConditionExtension implements Extension {
                         beanAttributes.getTypes(),
                         conditionClass.getName()
                 });
+    }
+
+    /**
+     * Observes synthetic beans to make the current prototype limitation explicit.
+     * <p>
+     * This method does not apply {@link RequiresCondition} to synthetic beans.
+     * Synthetic beans do not necessarily originate from an annotated class,
+     * producer method, or producer field. Therefore, there is no portable
+     * annotation location for this prototype to inspect.
+     * </p>
+     *
+     * @param event the process synthetic bean event
+     * @param <T> the synthetic bean type
+     */
+    <T> void processSyntheticBean(@Observes ProcessSyntheticBean<T> event) {
+        LOGGER.log(Level.FINE,
+                "Synthetic bean {0} was discovered. RequiresCondition is not applied "
+                        + "to synthetic beans by this prototype.",
+                event.getBean());
     }
 
     private Condition createCondition(Class<? extends Condition> conditionClass) {
