@@ -124,7 +124,7 @@ public class RequiresConditionExtension implements Extension {
                                       Class<? extends Condition> conditionClass,
                                       BeanAttributes<?> beanAttributes) {
         try {
-            return condition.test();
+            return condition.test(new DefaultConditionContext());
         } catch (RuntimeException exception) {
             String message = "Condition evaluation failed for "
                     + conditionClass.getName()
