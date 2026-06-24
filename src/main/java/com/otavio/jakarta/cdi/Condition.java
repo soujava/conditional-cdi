@@ -42,5 +42,5 @@ public interface Condition {
      * @return {@code true} if the condition matches and the bean may be enabled;
      *         {@code false} otherwise
      */
-    boolean test();
+    boolean test(ConditionContext context);
 }
